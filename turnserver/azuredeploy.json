@@ -1,0 +1,189 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {"turnServerName": {
+        "type": "string",
+        "defaultValue": "turnSrv",        
+        "metadata": {
+            "description": "The base name of the turn server"
+        }
+    },"vmAdminUsername": {
+            "type": "string",
+            "minLength":6,
+            "defaultValue":"adminUsername",
+            "metadata": {
+                "description": "Username for the turn server virtual machine"
+            }
+        },"vmAdminPassword": {
+            "type": "securestring",
+            "defaultValue":"ThisIsThe4dminP$$",
+            "metadata": {
+                "description": "Administrator password for the turn server virtual machine"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "serverName": "[substring(concat(parameters('turnServerName'),uniqueString(resourceGroup().id)),0,15)]"
+    },
+    "resources": [{
+        "name": "[toLower(variables('serverName'))]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2019-06-01",
+        "location": "[resourceGroup().location]",
+        "tags": {
+            "displayName": "Turn Server Storage Account"
+        },
+        "sku": {
+            "name": "Standard_LRS"
+        },
+        "kind": "Storage"
+    },
+    {
+        "name": "[concat(variables('serverName'),'-PublicIP')]",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "apiVersion": "2019-11-01",
+        "location": "[resourceGroup().location]",
+        "tags": {
+            "displayName": "PublicIPAddress"
+        },
+        "properties": {
+            "publicIPAllocationMethod": "Dynamic",
+            "dnsSettings": {
+                "domainNameLabel": "[toLower(variables('serverName'))]"
+            }
+        }
+    },
+    {
+        "name": "[concat(variables('serverName'),'-nsg')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2018-08-01",
+        "location": "[resourceGroup().location]",
+        "properties": {
+            "securityRules": [
+                {
+                    "name": "nsgRule1",
+                    "properties": {
+                        "description": "description",
+                        "protocol": "Tcp",
+                        "sourcePortRange": "*",
+                        "destinationPortRange": "22",
+                        "sourceAddressPrefix": "*",
+                        "destinationAddressPrefix": "*",
+                        "access": "Allow",
+                        "priority": 100,
+                        "direction": "Inbound"
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "[concat(variables('serverName'),'-VirtualNetwork')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "2019-11-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('serverName'),'-nsg'))]"
+        ],
+        "tags": {
+            "displayName": "[concat(variables('serverName'),'-VirtualNetwork')]"
+        },
+        "properties": {
+            "addressSpace": {
+                "addressPrefixes": [
+                    "10.0.0.0/16"
+                ]
+            },
+            "subnets": [
+                {
+                    "name": "[concat(variables('serverName'),'-VirtualNetwork-Subnet')]",
+                    "properties": {
+                        "addressPrefix": "10.0.0.0/24",
+                        "networkSecurityGroup": {
+                            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('serverName'),'-nsg'))]"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "[concat(variables('serverName'),'-NetworkInterface')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2019-11-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('serverName'),'-PublicIP'))]",
+            "[resourceId('Microsoft.Network/virtualNetworks', concat(variables('serverName'),'-VirtualNetwork'))]"
+        ],
+        "tags": {
+            "displayName": "[concat(variables('serverName'),'-NetworkInterface')]"
+        },
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "ipConfig1",
+                    "properties": {
+                        "privateIPAllocationMethod": "Dynamic",
+                        "publicIPAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('serverName'),'-PublicIP'))]"
+                        },
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(variables('serverName'),'-VirtualNetwork'), concat(variables('serverName'),'-VirtualNetwork-Subnet'))]"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "[variables('serverName')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "apiVersion": "2019-07-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('serverName'),'-NetworkInterface'))]"
+        ],
+        "tags": {
+            "displayName": "[variables('serverName')]"
+        },
+        "properties": {
+            "hardwareProfile": {
+                "vmSize": "Standard_A2_v2"
+            },
+            "osProfile": {
+                "computerName": "[variables('serverName')]",
+                "adminUsername": "[parameters('vmAdminUsername')]",
+                "adminPassword": "[parameters('vmAdminPassword')]"
+            },
+            "storageProfile": {
+                "imageReference": {
+                    "publisher": "Canonical",
+                    "offer": "UbuntuServer",
+                    "sku": "16.04-LTS",
+                    "version": "latest"
+                },
+                "osDisk": {
+                    "name": "[concat(variables('serverName'),'-OSDisk')]",
+                    "caching": "ReadWrite",
+                    "createOption": "FromImage"
+                }
+            },
+            "networkProfile": {
+                "networkInterfaces": [
+                    {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('serverName'),'-NetworkInterface'))]"
+                    }
+                ]
+            },
+            "diagnosticsProfile": {
+                "bootDiagnostics": {
+                    "enabled": true,
+                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', toLower(variables('serverName')))).primaryEndpoints.blob]"
+                }
+            }
+        }
+    }],
+    "outputs": {}
+}
