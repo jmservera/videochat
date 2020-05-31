@@ -9,16 +9,54 @@
         }
     },"vmAdminUsername": {
             "type": "string",
-            "minLength":6,
             "defaultValue":"adminUsername",
             "metadata": {
                 "description": "Username for the turn server virtual machine"
             }
         },"vmAdminPassword": {
             "type": "securestring",
+            "minLength":8,
             "defaultValue":"ThisIsThe4dminP$$",
             "metadata": {
                 "description": "Administrator password for the turn server virtual machine"
+            }
+        },
+        "turnAdmin": {
+            "type": "string",
+            "defaultValue":"admin",
+            "metadata": {
+                "description": "Administrator username for the turn server."
+            }
+        },
+        "turnAdminPassword": {
+            "type": "securestring",
+            "defaultValue":"ThisIsThe4dminP$$",
+            "minLength":8,
+            "metadata": {
+                "description": "Administrator password for the turn server."
+            }
+        },
+        "turnServerRealm": {
+            "type": "string",
+            "defaultValue":"myrealm.com",
+            "metadata": {
+                "description": "The default realm to be used for the users."
+            }
+        },
+        "storageSku": {
+            "type": "object",
+            "allowedValues": [
+                "Premium_LRS",
+                "Premium_ZRS",
+                "Standard_GRS",
+                "Standard_GZRS",
+                "Standard_RAGRS",
+                "Standard_RAGZRS",
+                "Standard_LRS",
+                "Standard_ZRS"],
+            "defaultValue": "Standard_LRS",
+            "metadata": {
+                "description": "The type of replication to use for the storage account."
             }
         }
     },
@@ -35,7 +73,7 @@
             "displayName": "Turn Server Storage Account"
         },
         "sku": {
-            "name": "Standard_LRS"
+            "name": "[parameters('storageSku')]"
         },
         "kind": "Storage"
     },
@@ -182,6 +220,27 @@
                     "enabled": true,
                     "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', toLower(variables('serverName')))).primaryEndpoints.blob]"
                 }
+            },
+            "extensionProfile":{
+                "extensions":[
+                    {
+                        "name": "installScriptExtension",
+                        "properties": {
+                            "publisher": "Microsoft.Azure.Extensions",
+                            "type": "CustomScript",
+                            "typeHandlerVersion": "2.1",
+                            "autoUpgradeMinorVersion": true,
+                            "settings": {
+                                "fileUris": [
+                                    "https://github.com/jmservera/videochat/turnserver/scripts/installturn.sh"
+                                ]
+                            },
+                            "protectedSettings": {
+                                "commandToExecute": "sh installturn.sh"
+                            }
+                        }
+                    }
+                ]
             }
         }
     }],
