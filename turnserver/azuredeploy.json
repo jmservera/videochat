@@ -106,16 +106,44 @@
             "properties": {
                 "securityRules": [
                     {
-                        "name": "nsgRule1",
+                        "name": "SSH",
                         "properties": {
-                            "description": "description",
+                            "description": "Allow ssh access",
                             "protocol": "Tcp",
                             "sourcePortRange": "*",
                             "destinationPortRange": "22",
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
-                            "priority": 100,
+                            "priority": 300,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "TURN",
+                        "properties": {
+                            "description": "Allow TURN access",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3478",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 310,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "TURN_SSL",
+                        "properties": {
+                            "description": "Allow TURN access over TLS",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "5349",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 320,
                             "direction": "Inbound"
                         }
                     }
