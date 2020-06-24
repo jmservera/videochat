@@ -1,8 +1,8 @@
 sudo apt-get update && sudo apt-get install -y dnsutils && sudo apt-get install -y coturn
 
-systemctl stop coturn
+sudo systemctl stop coturn
 
-echo "TURNSERVER_ENABLED=1" > /etc/default/coturn
+sudo echo "TURNSERVER_ENABLED=1" > /etc/default/coturn
 
 echo "realm=$3
 server-name=$3
@@ -18,4 +18,4 @@ openssl req -x509 -newkey rsa:4096 -passout pass:falsepass -keyout /etc/ssl/turn
 
 turnadmin -a -u $1 -p $2 -r $3
 
-systemctl start coturn
+sudo systemctl start coturn
