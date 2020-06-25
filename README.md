@@ -3,6 +3,8 @@
 A [WebRTC test](https://tsh.io/blog/how-to-write-video-chat-app-using-webrtc-and-nodejs/)
 
 You may need a [TURN server](https://devblogs.microsoft.com/cse/2018/01/29/orchestrating-turn-servers-cloud-deployment/) and to create a certificate for it:
+https://fatiherikci.com/en/how-to-install-turn-coturn/
+
 
 > openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
 

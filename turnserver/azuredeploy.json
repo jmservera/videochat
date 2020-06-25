@@ -233,7 +233,7 @@
                     "imageReference": {
                         "publisher": "Canonical",
                         "offer": "UbuntuServer",
-                        "sku": "16.04-LTS",
+                        "sku": "18.04-LTS",
                         "version": "latest"
                     },
                     "osDisk": {
@@ -263,7 +263,7 @@
             "apiVersion": "2019-07-01",
             "location": "[resourceGroup().location]",
             "tags": {
-                "displayName": "customScript1 for Linux VM"
+                "displayName": "Install script for TURN server in Linux VM"
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', variables('serverName'))]"
