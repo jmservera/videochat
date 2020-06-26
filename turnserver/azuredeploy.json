@@ -61,8 +61,10 @@
     ],
     "variables": {
         "serverName": "[toLower(substring(concat(parameters('turnServerName'),uniqueString(resourceGroup().id)),0,15))]",
-        "ipAddressId": "[concat(parameters('serverName'),'-ip')]",
-        "vnet": "[concat(parameters('serverName'),'-vnet')]"
+        "ipAddressId": "[concat(variables('serverName'),'-ip')]",
+        "vnet": "[concat(variables('serverName'),'-vnet')]",
+        "subnet":"[concat(variables('serverName'),'-subnet')]",
+        "nsg":"[concat(variables('serverName'),'-nsg')]"
     },
     "resources": [
         {
@@ -87,14 +89,14 @@
                 "displayName": "PublicIPAddress"
             },
             "properties": {
-                "publicIPAllocationMethod": "Dynamic",
+                "publicIPAllocationMethod": "Static",
                 "dnsSettings": {
-                    "domainNameLabel": "[toLower(variables('serverName'))]"
+                    "domainNameLabel": "[variables('serverName')]"
                 }
             }
         },
         {
-            "name": "[concat(variables('serverName'),'-nsg')]",
+            "name": "[variables('nsg')]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2018-08-01",
             "location": "[resourceGroup().location]",
@@ -151,7 +153,7 @@
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('serverName'),'-nsg'))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsg'))]"
             ],
             "tags": {
                 "displayName": "[variables('vnet')]"
@@ -164,11 +166,11 @@
                 },
                 "subnets": [
                     {
-                        "name": "[concat(variables('serverName'),'-VirtualNetwork-Subnet')]",
+                        "name": "[variables('subnet')]",
                         "properties": {
                             "addressPrefix": "10.0.0.0/24",
                             "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('serverName'),'-nsg'))]"
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsg'))]"
                             }
                         }
                     }
@@ -197,7 +199,7 @@
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId'))]"
                             },
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet'), concat(variables('serverName'),'-VirtualNetwork-Subnet'))]"
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet'), variables('subnet'))]"
                             }
                         }
                     }
@@ -275,7 +277,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh installturn.sh ',parameters('turnAdmin'),' ',parameters('turnAdminPassword'),' ', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).dnsSettings.fqdn )]"
+                    "commandToExecute": "[concat('sh installturn.sh ',parameters('turnAdmin'),' ',parameters('turnAdminPassword'),' ', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).dnsSettings.fqdn, ' ', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).ipAddress )]"
                 }
             }
         }
