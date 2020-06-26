@@ -1,3 +1,5 @@
+externalIp="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+
 sudo apt-get update && sudo apt-get install -y dnsutils && sudo apt-get install -y coturn certbot
 
 sudo systemctl stop coturn
@@ -8,7 +10,7 @@ sudo echo "TURNSERVER_ENABLED=1" > /etc/default/coturn
 # create configuration
 echo "listening-port=3478
 tls-listening-port=5349
-external-ip=$4
+external-ip=$externalIp
 realm=$3
 server-name=$3
 

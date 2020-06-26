@@ -61,7 +61,8 @@
     ],
     "variables": {
         "serverName": "[toLower(substring(concat(parameters('turnServerName'),uniqueString(resourceGroup().id)),0,15))]",
-        "ipAddressId": "[concat(variables('serverName'),'-PublicIP')]"
+        "ipAddressId": "[concat(parameters('serverName'),'-ip')]",
+        "vnet": "[concat(parameters('serverName'),'-vnet')]"
     },
     "resources": [
         {
@@ -145,7 +146,7 @@
             }
         },
         {
-            "name": "[concat(variables('serverName'),'-VirtualNetwork')]",
+            "name": "[variables('vnet')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
@@ -153,7 +154,7 @@
                 "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('serverName'),'-nsg'))]"
             ],
             "tags": {
-                "displayName": "[concat(variables('serverName'),'-VirtualNetwork')]"
+                "displayName": "[variables('vnet')]"
             },
             "properties": {
                 "addressSpace": {
@@ -181,7 +182,7 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', concat(variables('serverName'),'-VirtualNetwork'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet'))]"
             ],
             "tags": {
                 "displayName": "[concat(variables('serverName'),'-NetworkInterface')]"
@@ -196,7 +197,7 @@
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId'))]"
                             },
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(variables('serverName'),'-VirtualNetwork'), concat(variables('serverName'),'-VirtualNetwork-Subnet'))]"
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet'), concat(variables('serverName'),'-VirtualNetwork-Subnet'))]"
                             }
                         }
                     }
@@ -274,7 +275,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh installturn.sh ',parameters('turnAdmin'),' ',parameters('turnAdminPassword'),' ', reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('ipAddressId'))).dnsSettings.fqdn, reference(resourceId('Microsoft.Network/publicIPAddresses', ' ', parameters('ipAddressId'))).ipAddress )]"
+                    "commandToExecute": "[concat('sh installturn.sh ',parameters('turnAdmin'),' ',parameters('turnAdminPassword'),' ', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).dnsSettings.fqdn )]"
                 }
             }
         }
