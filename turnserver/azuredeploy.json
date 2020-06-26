@@ -41,13 +41,6 @@
                 "description": "The base name of the turn server"
             }
         },
-        "turnServerRealm": {
-            "type": "string",
-            "defaultValue": "myrealm.com",
-            "metadata": {
-                "description": "The default realm to be used for the users."
-            }
-        },
         "vmAdminPassword": {
             "type": "securestring",
             "minLength": 8,
@@ -67,11 +60,12 @@
     "functions": [
     ],
     "variables": {
-        "serverName": "[substring(concat(parameters('turnServerName'),uniqueString(resourceGroup().id)),0,15)]"
+        "serverName": "[toLower(substring(concat(parameters('turnServerName'),uniqueString(resourceGroup().id)),0,15))]",
+        "ipAddressId": "[concat(variables('serverName'),'-PublicIP')]"
     },
     "resources": [
         {
-            "name": "[toLower(variables('serverName'))]",
+            "name": "[variables('serverName')]",
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2019-06-01",
             "location": "[resourceGroup().location]",
@@ -84,7 +78,7 @@
             "kind": "Storage"
         },
         {
-            "name": "[concat(variables('serverName'),'-PublicIP')]",
+            "name": "[variables('ipAddressId')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
@@ -186,7 +180,7 @@
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('serverName'),'-PublicIP'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId'))]",
                 "[resourceId('Microsoft.Network/virtualNetworks', concat(variables('serverName'),'-VirtualNetwork'))]"
             ],
             "tags": {
@@ -199,7 +193,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('serverName'),'-PublicIP'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId'))]"
                             },
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(variables('serverName'),'-VirtualNetwork'), concat(variables('serverName'),'-VirtualNetwork-Subnet'))]"
@@ -258,7 +252,7 @@
             }
         },
         {
-            "name": "[concat(variables('serverName'),'/installcustomscript')]",
+            "name": "[concat(variables('serverName'),'/installturn')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-07-01",
             "location": "[resourceGroup().location]",
@@ -266,7 +260,8 @@
                 "displayName": "Install script for TURN server in Linux VM"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', variables('serverName'))]"
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('serverName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId'))]"
             ],
             "properties": {
                 "publisher": "Microsoft.Azure.Extensions",
@@ -279,7 +274,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh installturn.sh ',parameters('turnAdmin'),' ',parameters('turnAdminPassword'),' ',parameters('turnServerRealm'))]"
+                    "commandToExecute": "[concat('sh installturn.sh ',parameters('turnAdmin'),' ',parameters('turnAdminPassword'),' ', reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('ipAddressId'))).dnsSettings.fqdn, reference(resourceId('Microsoft.Network/publicIPAddresses', ' ', parameters('ipAddressId'))).ipAddress )]"
                 }
             }
         }
