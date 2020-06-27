@@ -62,6 +62,7 @@
         {
             "apiVersion": "2017-05-10",
             "name": "turnserverTemplate",
+            "comments": "Creates a TURN server in a VM",
             "type": "Microsoft.Resources/deployments",
             "properties": {
               "mode": "Incremental",
@@ -81,7 +82,7 @@
           },
           {
             "apiVersion": "2017-05-10",
-            "name": "linkedTemplate",
+            "name": "webappTemplate",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": ["[resourceId('Microsoft.Resources/deployments', 'turnserverTemplate')]"],
             "properties": {
@@ -91,7 +92,7 @@
                 "contentVersion": "1.0.0.0"
               },
               "parameters":{
-                  "turnServer":{"value": "[reference( resourceId('Microsoft.Resources/deployments', 'turnserverTemplate') ).dns]"},
+                  "turnServer":{"value": "[reference( resourceId('Microsoft.Resources/deployments', 'turnserverTemplate') ).outputs.dns.value]"},
                   "turnAdmin":{"value": "[parameters('turnAdmin')]"},
                   "turnAdminPassword":{"value": "[parameters('turnAdminPassword')]"}
               }
