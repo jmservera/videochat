@@ -1,7 +1,7 @@
-#externalIp="$(dig +short myip.opendns.com @resolver1.opendns.com)"
-externalIp=$4
+# it is important to use an static IP so this value does not change over time
 
-sudo apt-get update && sudo apt-get install -y dnsutils && sudo apt-get install -y coturn certbot
+# first get all the files
+sudo apt-get update && sudo apt-get install -y dnsutils coturn certbot
 
 sudo systemctl stop coturn
 
@@ -11,7 +11,7 @@ sudo echo "TURNSERVER_ENABLED=1" > /etc/default/coturn
 # create configuration
 echo "listening-port=3478
 tls-listening-port=5349
-external-ip=$externalIp
+external-ip=$4
 realm=$3
 server-name=$3
 
@@ -32,16 +32,14 @@ cli-password=$2
 
 log-file=/var/log/turnserver.log
 verbose
-no-stdout-log"  | tee /etc/turnserver.conf
+no-stdout-log"  > /etc/turnserver.conf
 
 # add an admin user, will be needed 
 turnadmin -a -u $1 -p $2 -r $3
 
 sudo systemctl start coturn
 
-# you can generate self signed certificates, use real ones for a production server like with the certbot
-#openssl req -x509 -newkey rsa:4096 -passout pass:falsepass -keyout /etc/ssl/turn_server_pkey.pem -out /etc/ssl/turn_server_cert.pem -days 365 -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US'
-
+# use certbot to create coturn certificate, you need to have port 80 open to allow the certbot to verify
 sudo certbot certonly --standalone --deploy-hook "systemctl restart coturn" -d $3 --agree-tos --no-eff-email --register-unsafely-without-email
 
 
