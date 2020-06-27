@@ -57,18 +57,20 @@
             }
         }
     },
-    "functions": [
-    ],
+    "functions": [],
     "variables": {
         "serverName": "[toLower(substring(concat(parameters('turnServerName'),uniqueString(resourceGroup().id)),0,15))]",
         "ipAddressId": "[concat(variables('serverName'),'-ip')]",
         "vnet": "[concat(variables('serverName'),'-vnet')]",
-        "subnet":"[concat(variables('serverName'),'-subnet')]",
-        "nsg":"[concat(variables('serverName'),'-nsg')]"
+        "subnet": "[concat(variables('serverName'),'-subnet')]",
+        "nsg": "[concat(variables('serverName'),'-nsg')]",
+        "nic": "[concat(variables('serverName'),'-nic')]",
+        "storage": "[concat(variables('serverName'),'storage')]",
+        "disk": "[concat(variables('serverName'),'-disk')]"
     },
     "resources": [
         {
-            "name": "[variables('serverName')]",
+            "name": "[variables('storage')]",
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2019-06-01",
             "location": "[resourceGroup().location]",
@@ -143,6 +145,34 @@
                             "priority": 320,
                             "direction": "Inbound"
                         }
+                    },
+                    {
+                        "name": "HTTP",
+                        "properties": {
+                            "description": "Allow HTTP access for TLS verification",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 330,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "HTTPS",
+                        "properties": {
+                            "description": "Allow HTTPS access for TLS verification",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 340,
+                            "direction": "Inbound"
+                        }
                     }
                 ]
             }
@@ -178,7 +208,7 @@
             }
         },
         {
-            "name": "[concat(variables('serverName'),'-NetworkInterface')]",
+            "name": "[variables('nic')]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
@@ -187,7 +217,7 @@
                 "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet'))]"
             ],
             "tags": {
-                "displayName": "[concat(variables('serverName'),'-NetworkInterface')]"
+                "displayName": "[variables('nic')]"
             },
             "properties": {
                 "ipConfigurations": [
@@ -212,7 +242,7 @@
             "apiVersion": "2019-07-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('serverName'),'-NetworkInterface'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('nic'))]"
             ],
             "tags": {
                 "displayName": "[variables('serverName')]"
@@ -234,7 +264,7 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "[concat(variables('serverName'),'-OSDisk')]",
+                        "name": "[variables('disk')]",
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
                     }
@@ -242,14 +272,14 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('serverName'),'-NetworkInterface'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic'))]"
                         }
                     ]
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', toLower(variables('serverName')))).primaryEndpoints.blob]"
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storage'))).primaryEndpoints.blob]"
                     }
                 }
             }
@@ -277,11 +307,10 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh installturn.sh ',parameters('turnAdmin'),' ',parameters('turnAdminPassword'),' ', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).dnsSettings.fqdn, ' ', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).ipAddress )]"
+                    "commandToExecute": "[concat('sh installturn.sh ''',parameters('turnAdmin'),''' ''',parameters('turnAdminPassword'),''' ''', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).dnsSettings.fqdn, ''' ''', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).ipAddress, '''')]"
                 }
             }
         }
     ],
-    "outputs": {
-    }
+    "outputs": {}
 }
