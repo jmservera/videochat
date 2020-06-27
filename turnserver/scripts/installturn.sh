@@ -1,6 +1,7 @@
 # it is important to use an static IP so this value does not change over time
 
 # first get all the files
+sudo add-apt-repository ppa:certbot/certbot -y
 sudo apt-get update && sudo apt-get install -y dnsutils coturn certbot
 
 sudo systemctl stop coturn
