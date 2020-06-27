@@ -312,5 +312,10 @@
             }
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "dns":{
+            "type":"string",
+            "value":"[reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).dnsSettings.fqdn]"
+        }
+    }
 }
