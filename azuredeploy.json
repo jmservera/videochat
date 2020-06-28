@@ -92,6 +92,7 @@
                 "contentVersion": "1.0.0.0"
               },
               "parameters":{
+                  "name":{"value":"[parameters('turnServerName')]"},
                   "turnServer":{"value": "[reference( resourceId('Microsoft.Resources/deployments', 'turnserverTemplate') ).outputs.dns.value]"},
                   "turnAdmin":{"value": "[parameters('turnAdmin')]"},
                   "turnAdminPassword":{"value": "[parameters('turnAdminPassword')]"}
