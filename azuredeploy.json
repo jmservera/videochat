@@ -19,6 +19,13 @@
                 "description": "The type of replication to use for the storage account."
             }
         },
+        "turnServerName": {
+            "type": "string",
+            "defaultValue": "turnSrv",
+            "metadata": {
+                "description": "The base name of the turn server"
+            }
+        },
         "turnAdmin": {
             "type": "string",
             "defaultValue": "admin",
@@ -34,11 +41,11 @@
                 "description": "Administrator password for the turn server."
             }
         },
-        "turnServerName": {
+        "vmAdminUsername": {
             "type": "string",
-            "defaultValue": "turnSrv",
+            "defaultValue": "adminUsername",
             "metadata": {
-                "description": "The base name of the turn server"
+                "description": "Username for the turn server virtual machine"
             }
         },
         "vmAdminPassword": {
@@ -47,13 +54,6 @@
             "defaultValue": "ThisIsThe4dminP$$",
             "metadata": {
                 "description": "Administrator password for the turn server virtual machine"
-            }
-        },
-        "vmAdminUsername": {
-            "type": "string",
-            "defaultValue": "adminUsername",
-            "metadata": {
-                "description": "Username for the turn server virtual machine"
             }
         }
     },
