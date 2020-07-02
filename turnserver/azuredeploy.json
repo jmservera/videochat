@@ -133,6 +133,20 @@
                         }
                     },
                     {
+                        "name": "TURN_ALT",
+                        "properties": {
+                            "description": "Allow TURN access",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3479",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 315,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
                         "name": "TURN_SSL",
                         "properties": {
                             "description": "Allow TURN access over TLS",
@@ -143,6 +157,20 @@
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
                             "priority": 320,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "TURN_SSL_ALT",
+                        "properties": {
+                            "description": "Allow TURN access over TLS",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "5350",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 325,
                             "direction": "Inbound"
                         }
                     },

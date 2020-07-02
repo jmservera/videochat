@@ -12,6 +12,10 @@ sudo echo "TURNSERVER_ENABLED=1" > /etc/default/coturn
 # create configuration
 echo "listening-port=3478
 tls-listening-port=5349
+
+alt-listening-port=3479
+alt-tls-listening-port=5350
+
 external-ip=$4
 realm=$3
 server-name=$3
@@ -23,8 +27,6 @@ userdb=/var/lib/turn/turndb
 
 cert= /etc/letsencrypt/live/$3/cert.pem
 pkey= /etc/letsencrypt/live/$3/privkey.pem
-
-stale-nonce
 
 use-auth-secret
 static-auth-secret=$2
