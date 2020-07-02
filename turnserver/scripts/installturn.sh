@@ -13,9 +13,6 @@ sudo echo "TURNSERVER_ENABLED=1" > /etc/default/coturn
 echo "listening-port=3478
 tls-listening-port=5349
 
-alt-listening-port=3479
-alt-tls-listening-port=5350
-
 external-ip=$4
 realm=$3
 server-name=$3
