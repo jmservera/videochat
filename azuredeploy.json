@@ -53,13 +53,6 @@
             "metadata": {
                 "description": "Administrator password for the turn server virtual machine"
             }
-        },
-        "location": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().location]",
-            "metadata": {
-                "description": "The location in which the resources should be deployed."
-            }
         }
     },
     "variables": {},
@@ -82,7 +75,7 @@
                     "turnServerName": { "value": "[parameters('turnServerName')]" },
                     "vmAdminPassword": { "value": "[parameters('vmAdminPassword')]" },
                     "vmAdminUsername": { "value": "[parameters('vmAdminUsername')]" },
-                    "location": { "value": "[parameters('location')]" }
+                    "location": { "value": "[resourceGroup().location]" }
                 }
             }
         },
@@ -102,7 +95,7 @@
                     "turnServer": { "value": "[reference( resourceId('Microsoft.Resources/deployments', 'turnserverTemplate') ).outputs.dns.value]" },
                     "turnAdmin": { "value": "[parameters('turnAdmin')]" },
                     "turnAdminPassword": { "value": "[parameters('turnAdminPassword')]" },
-                    "location": { "value": "[parameters('location')]" }
+                    "location": { "value": "[resourceGroup().location]" }
                 }
             }
         }
