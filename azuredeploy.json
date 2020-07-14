@@ -35,7 +35,6 @@
         },
         "turnAdminPassword": {
             "type": "securestring",
-            "defaultValue": "ThisIsThe4dminP$$",
             "minLength": 8,
             "metadata": {
                 "description": "Administrator password for the turn server."
@@ -51,9 +50,15 @@
         "vmAdminPassword": {
             "type": "securestring",
             "minLength": 8,
-            "defaultValue": "ThisIsThe4dminP$$",
             "metadata": {
                 "description": "Administrator password for the turn server virtual machine"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location in which the resources should be deployed."
             }
         }
     },
@@ -65,39 +70,41 @@
             "comments": "Creates a TURN server in a VM",
             "type": "Microsoft.Resources/deployments",
             "properties": {
-              "mode": "Incremental",
-              "templateLink": {
-                "uri": "[uri(deployment().properties.templateLink.uri, 'turnserver/azuredeploy.json')]",
-                "contentVersion": "1.0.0.0"
-              },
-              "parameters":{
-                  "storageSku":{"value": "[parameters('storageSku')]"},
-                  "turnAdmin":{"value": "[parameters('turnAdmin')]"},
-                  "turnAdminPassword":{"value": "[parameters('turnAdminPassword')]"},
-                  "turnServerName":{"value": "[parameters('turnServerName')]"},
-                  "vmAdminPassword":{"value": "[parameters('vmAdminPassword')]"},
-                  "vmAdminUsername":{"value": "[parameters('vmAdminUsername')]"}
-              }
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'turnserver/azuredeploy.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageSku": { "value": "[parameters('storageSku')]" },
+                    "turnAdmin": { "value": "[parameters('turnAdmin')]" },
+                    "turnAdminPassword": { "value": "[parameters('turnAdminPassword')]" },
+                    "turnServerName": { "value": "[parameters('turnServerName')]" },
+                    "vmAdminPassword": { "value": "[parameters('vmAdminPassword')]" },
+                    "vmAdminUsername": { "value": "[parameters('vmAdminUsername')]" },
+                    "location": { "value": "[parameters('location')]" }
+                }
             }
-          },
-          {
+        },
+        {
             "apiVersion": "2017-05-10",
             "name": "webappTemplate",
             "type": "Microsoft.Resources/deployments",
-            "dependsOn": ["[resourceId('Microsoft.Resources/deployments', 'turnserverTemplate')]"],
+            "dependsOn": [ "[resourceId('Microsoft.Resources/deployments', 'turnserverTemplate')]" ],
             "properties": {
-              "mode": "Incremental",
-              "templateLink": {
-                "uri": "[uri(deployment().properties.templateLink.uri, 'webapp/azuredeploy.json')]",
-                "contentVersion": "1.0.0.0"
-              },
-              "parameters":{
-                  "name":{"value":"[parameters('turnServerName')]"},
-                  "turnServer":{"value": "[reference( resourceId('Microsoft.Resources/deployments', 'turnserverTemplate') ).outputs.dns.value]"},
-                  "turnAdmin":{"value": "[parameters('turnAdmin')]"},
-                  "turnAdminPassword":{"value": "[parameters('turnAdminPassword')]"}
-              }
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(deployment().properties.templateLink.uri, 'webapp/azuredeploy.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "name": { "value": "[parameters('turnServerName')]" },
+                    "turnServer": { "value": "[reference( resourceId('Microsoft.Resources/deployments', 'turnserverTemplate') ).outputs.dns.value]" },
+                    "turnAdmin": { "value": "[parameters('turnAdmin')]" },
+                    "turnAdminPassword": { "value": "[parameters('turnAdminPassword')]" },
+                    "location": { "value": "[parameters('location')]" }
+                }
             }
-          }
+        }
     ]
 }

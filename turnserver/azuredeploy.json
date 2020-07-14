@@ -28,7 +28,6 @@
         },
         "turnAdminPassword": {
             "type": "securestring",
-            "defaultValue": "ThisIsThe4dminP$$",
             "minLength": 8,
             "metadata": {
                 "description": "Administrator password for the turn server."
@@ -44,23 +43,37 @@
         "vmAdminPassword": {
             "type": "securestring",
             "minLength": 8,
-            "defaultValue": "ThisIsThe4dminP$$",
             "metadata": {
                 "description": "Administrator password for the turn server virtual machine"
             }
         },
         "vmAdminUsername": {
             "type": "string",
-            "defaultValue": "adminUsername",
+            "defaultValue": "admin",
             "metadata": {
                 "description": "Username for the turn server virtual machine"
             }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location in which the resources should be deployed."
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue":"Standard_A2_v2",
+            "metadata": {
+                "description":"The size of the Virtual Machine."
+            }
+
         }
     },
     "functions": [],
     "variables": {
         "serverName": "[toLower(substring(concat(parameters('turnServerName'),uniqueString(resourceGroup().id)),0,15))]",
-        "ipAddressId": "[concat(variables('serverName'),'-ip')]",
+        "ipAddressName": "[concat(variables('serverName'),'-ip')]",
         "vnet": "[concat(variables('serverName'),'-vnet')]",
         "subnet": "[concat(variables('serverName'),'-subnet')]",
         "nsg": "[concat(variables('serverName'),'-nsg')]",
@@ -73,7 +86,7 @@
             "name": "[variables('storage')]",
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2019-06-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "tags": {
                 "displayName": "Turn Server Storage Account"
             },
@@ -83,10 +96,10 @@
             "kind": "Storage"
         },
         {
-            "name": "[variables('ipAddressId')]",
+            "name": "[variables('ipAddressName')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-11-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "tags": {
                 "displayName": "PublicIPAddress"
             },
@@ -101,7 +114,7 @@
             "name": "[variables('nsg')]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "properties": {
                 "securityRules": [
                     {
@@ -209,7 +222,7 @@
             "name": "[variables('vnet')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-11-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsg'))]"
             ],
@@ -239,9 +252,9 @@
             "name": "[variables('nic')]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-11-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressName'))]",
                 "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet'))]"
             ],
             "tags": {
@@ -254,7 +267,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressName'))]"
                             },
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet'), variables('subnet'))]"
@@ -268,7 +281,7 @@
             "name": "[variables('serverName')]",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-07-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('nic'))]"
             ],
@@ -277,7 +290,7 @@
             },
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "Standard_A2_v2"
+                    "vmSize": "[parameters('vmSize')]"
                 },
                 "osProfile": {
                     "computerName": "[variables('serverName')]",
@@ -316,13 +329,13 @@
             "name": "[concat(variables('serverName'),'/installturn')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-07-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "tags": {
                 "displayName": "Install script for TURN server in Linux VM"
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', variables('serverName'))]",
-                "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId'))]"
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressName'))]"
             ],
             "properties": {
                 "publisher": "Microsoft.Azure.Extensions",
@@ -335,15 +348,15 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh installturn.sh ''',parameters('turnAdmin'),''' ''',parameters('turnAdminPassword'),''' ''', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).dnsSettings.fqdn, ''' ''', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).ipAddress, '''')]"
+                    "commandToExecute": "[concat('sh installturn.sh ''',parameters('turnAdmin'),''' ''',parameters('turnAdminPassword'),''' ''', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressName')) ).dnsSettings.fqdn, ''' ''', reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressName')) ).ipAddress, '''')]"
                 }
             }
         }
     ],
     "outputs": {
-        "dns":{
-            "type":"string",
-            "value":"[reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressId')) ).dnsSettings.fqdn]"
+        "dns": {
+            "type": "string",
+            "value": "[reference( resourceId('Microsoft.Network/publicIPAddresses', variables('ipAddressName')) ).dnsSettings.fqdn]"
         }
     }
 }
