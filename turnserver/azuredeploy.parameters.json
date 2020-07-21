@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageSku": {
+            "value": "Standard_LRS"
+        },
+        "turnAdmin": {
+            "value": "admin"
+        },
+        "turnAdminPassword": {
+            "value": "ThisIsTheP4$$w0rd" // TODO: Fill in parameter value
+        },
+        "turnServerName": {
+            "value": "turnSrv"
+        },
+        "vmAdminPassword": {
+            "value": "ThisIsTheP4$$w0rd" // TODO: Fill in parameter value
+        },
+        "vmAdminUsername": {
+            "value": "adminUsername"
+        },
+        "location": {
+            "value": "northeurope" // TODO: Fill in parameter value
+        }
+    }
+}
