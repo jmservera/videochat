@@ -1,6 +1,6 @@
 # Video Chat app deployment to Azure
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjmservera%2Fvideochat%2Fturnserver%2Fazuredeploy.json)
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjmservera%2Fvideochat%2Fmain%2Fazuredeploy.json)
 
 This is a [WebRTC test](https://tsh.io/blog/how-to-write-video-chat-app-using-webrtc-and-nodejs/) template to deploy a Web app + a [TURN server](https://devblogs.microsoft.com/cse/2018/01/29/orchestrating-turn-servers-cloud-deployment/) in Azure, with SSL Certificates from letsencrypt.org
 
