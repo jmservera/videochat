@@ -6,4 +6,4 @@ This is a [WebRTC test](https://tsh.io/blog/how-to-write-video-chat-app-using-we
 
 You can find more WebRTC good explanations in [this article](https://webrtc.ventures/2018/07/tutorial-build-video-conference-application-webrtc-2/), and you can use [Trickle ICE](https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/) page to check your TURN server configuration.
 
-Check also the [Videochat Web App](https://github.com/jmservera/videochat-webapp) that is deployed in an Azure Web App through the template.
+Check also the [Video Chat Web App](https://github.com/jmservera/videochat-webapp) that is deployed in an Azure Web App through the template.
