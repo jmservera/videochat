@@ -1,4 +1,11 @@
+#!/bin/bash
+
 # it is important to use an static IP so this value does not change over time
+if [ ! $4 ]
+then
+    echo "Usage: $0 [adminusername] [adminpassword] [serverFQDN] [externalip]"
+    echo "Ensure the external IP does not change over time"
+fi
 
 # first get all the files
 sudo add-apt-repository ppa:certbot/certbot -y

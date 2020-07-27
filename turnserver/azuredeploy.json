@@ -343,7 +343,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "https://raw.githubusercontent.com/jmservera/videochat/turnserver/turnserver/scripts/installturn.sh"
+                        "https://raw.githubusercontent.com/jmservera/videochat/main/turnserver/scripts/installturn.sh"
                     ]
                 },
                 "protectedSettings": {
