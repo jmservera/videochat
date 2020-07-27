@@ -42,7 +42,7 @@
         },
         "vmAdminUsername": {
             "type": "string",
-            "defaultValue": "adminUsername",
+            "defaultValue": "localadmin",
             "metadata": {
                 "description": "Username for the turn server virtual machine"
             }
